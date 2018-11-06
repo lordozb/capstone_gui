@@ -9,18 +9,20 @@ global f, stop_event, pause_event
 
 stop_event = threading.Event()
 pause_event = threading.Event()
-f = open('data.txt', 'w+')
+
 
 # Daemon thread function to write the data to the file.
 def background(t, stop_event):
 	curr = 0
 	while curr < t and not stop_event.is_set():
 		if not pause_event.is_set():
+			f = open('data.txt', 'w+')
 			print("Writing file")
 			f.write(str(random.randint(1,100))+" ")
 			time.sleep(1)
 			curr += 1
-	f.close()
+			duration.set(str(t-curr))
+			f.close()
 
 def startIO():
 	# Will prevent I/O error or seg fault during post request if it takes too long.
@@ -33,7 +35,7 @@ def startIO():
 def calculate(*args):
 	try:
 		action.set("Start")
-		f = open('data.txt', 'w+')
+		stop_event.clear()
 		params = int(id.get())
 		time,name = map(str,fetch_details(params).text.split(","))
 		title.set(name)
@@ -45,7 +47,6 @@ def getdata(*args):
 	if action.get() == "Start":
 		action.set("Pause")
 		pause_event.clear()
-		stop_event.clear()
 		startIO()
 	else:
 		action.set("Start")
@@ -53,7 +54,7 @@ def getdata(*args):
 
 def stop():
 	stop_event.set()
-	f.close()
+
 
 root = Tk()
 root.title("Smart Learning System")
