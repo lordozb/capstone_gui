@@ -4,6 +4,7 @@ from webapp import fetch_details
 import threading
 import random
 import time
+import os
 
 global f, stop_event, pause_event
 
@@ -14,9 +15,18 @@ pause_event = threading.Event()
 # Daemon thread function to write the data to the file.
 def background(t, stop_event):
 	curr = 0
+	if not os.path.exists("./"+str(id.get())):
+		os.system("mkdir ./"+str(id.get()))
+
+	dir = "./"+str(id.get())
+	list = os.listdir(dir)
+	files = len(list)
+	file = "data_"+str(id.get())+"_"+str(files+1)+".txt"
+	os.system("touch "+dir+"/"+file)
+
 	while curr < t and not stop_event.is_set():
 		if not pause_event.is_set():
-			f = open('data.txt', 'w+')
+			f = open(dir+"/"+file, 'a')
 			print("Writing file")
 			f.write(str(random.randint(1,100))+" ")
 			time.sleep(1)
