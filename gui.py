@@ -12,20 +12,35 @@ stop_event = threading.Event()
 pause_event = threading.Event()
 
 
+def calculate(*args):
+	try:
+		action.set("Start")
+		stop_event.clear()
+		params = int(id.get())
+		time,name = map(str,fetch_details(params).text.split(","))
+		title.set(name)
+		duration.set(time)
+		if not os.path.exists("./"+str(id.get())):
+				os.system("mkdir ./"+str(id.get()))
+
+		dir = "./"+str(id.get())
+		list = os.listdir(dir)
+		files = len(list)
+		file = "data_"+str(id.get())+"_"+str(files+1)+".txt"
+		os.system("touch "+dir+"/"+file)
+	except ValueError:
+		pass
+
 # Daemon thread function to write the data to the file.
 def background(t, stop_event):
 	curr = 0
-	if not os.path.exists("./"+str(id.get())):
-		os.system("mkdir ./"+str(id.get()))
-
-	dir = "./"+str(id.get())
-	list = os.listdir(dir)
-	files = len(list)
-	file = "data_"+str(id.get())+"_"+str(files+1)+".txt"
-	os.system("touch "+dir+"/"+file)
 
 	while curr < t and not stop_event.is_set():
 		if not pause_event.is_set():
+			dir = "./"+str(id.get())
+			list = os.listdir(dir)
+			files = len(list)
+			file = "data_"+str(id.get())+"_"+str(files)+".txt"
 			f = open(dir+"/"+file, 'a')
 			print("Writing file")
 			f.write(str(random.randint(1,100))+" ")
@@ -41,17 +56,6 @@ def startIO():
 	# now threading1 runs regardless of user input
 	threading1.daemon = True
 	threading1.start()
-
-def calculate(*args):
-	try:
-		action.set("Start")
-		stop_event.clear()
-		params = int(id.get())
-		time,name = map(str,fetch_details(params).text.split(","))
-		title.set(name)
-		duration.set(time)
-	except ValueError:
-		pass
 
 def getdata(*args):
 	if action.get() == "Start":
