@@ -20,14 +20,15 @@ def calculate(*args):
 		time,name = map(str,fetch_details(params).text.split(","))
 		title.set(name)
 		duration.set(time)
-		if not os.path.exists("./"+str(id.get())):
-				os.system("mkdir ./"+str(id.get()))
+		if time != "-1":
+			if not os.path.exists("./"+str(id.get())):
+					os.system("mkdir ./"+str(id.get()))
 
-		dir = "./"+str(id.get())
-		list = os.listdir(dir)
-		files = len(list)
-		file = "data_"+str(id.get())+"_"+str(files+1)+".txt"
-		os.system("touch "+dir+"/"+file)
+			dir = "./"+str(id.get())
+			list = os.listdir(dir)
+			files = len(list)
+			file = "data_"+str(id.get())+"_"+str(files+1)+".txt"
+			os.system("touch "+dir+"/"+file)
 	except ValueError:
 		pass
 
@@ -35,27 +36,34 @@ def calculate(*args):
 def background(t, stop_event):
 	curr = 0
 
-	while curr < t and not stop_event.is_set():
-		if not pause_event.is_set():
-			dir = "./"+str(id.get())
-			list = os.listdir(dir)
-			files = len(list)
-			file = "data_"+str(id.get())+"_"+str(files)+".txt"
-			f = open(dir+"/"+file, 'a')
-			print("Writing file")
-			f.write(str(random.randint(1,100))+" ")
-			time.sleep(1)
-			curr += 1
-			duration.set(str(t-curr))
-			f.close()
+	try:
+		while curr < t and not stop_event.is_set():
+			if not pause_event.is_set():
+				dir = "./"+str(id.get())
+				list = os.listdir(dir)
+				files = len(list)
+				file = "data_"+str(id.get())+"_"+str(files)+".txt"
+				f = open(dir+"/"+file, 'a')
+				print("Writing file")
+				f.write(str(random.randint(1,100))+" ")
+				time.sleep(1)
+				curr += 1
+				duration.set(str(t-curr))
+				f.close()
+	except:
+		pass
 
 def startIO():
-	# Will prevent I/O error or seg fault during post request if it takes too long.
-	threading1 = threading.Thread(target=background, args = (int(duration.get()), stop_event))
 
-	# now threading1 runs regardless of user input
-	threading1.daemon = True
-	threading1.start()
+	try:
+		# Will prevent I/O error or seg fault during post request if it takes too long.
+		threading1 = threading.Thread(target=background, args = (int(duration.get()), stop_event))
+
+		# now threading1 runs regardless of user input
+		threading1.daemon = True
+		threading1.start()
+	except:
+		pass
 
 def getdata(*args):
 	if action.get() == "Start":
